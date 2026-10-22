@@ -217,3 +217,46 @@ details summary { cursor: pointer; color: var(--muted); font-size: 14px; padding
   max-width: calc(100% - 32px);
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* Period switcher */
+.switch {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+  background: var(--surface-2); border-radius: 10px; padding: 4px; margin: 10px 0 4px;
+}
+.switch button {
+  height: 36px; border: 0; border-radius: 7px; background: transparent;
+  color: var(--muted); font-size: 14px; font-weight: 600;
+}
+.switch button.on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.18); }
+
+.strip { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+h4.sub { font-size: 15px; margin: 16px 0 6px; }
+
+/* Day groups in the week view */
+.daygroup { margin-bottom: 10px; }
+.dayhead {
+  width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  min-height: 40px; padding: 6px 10px; border: 0; border-bottom: 1px solid var(--line);
+  background: none; color: var(--muted); font-size: 14px; margin-bottom: 6px;
+}
+.dayhead .dn { font-weight: 600; color: var(--text); }
+.dayhead.today { border-bottom-color: var(--accent); }
+.dayhead.today .dn { color: var(--accent); }
+
+/* Month and year grids */
+.grid7, .grid3 { display: grid; gap: 5px; margin: 8px 0 16px; }
+.grid7 { grid-template-columns: repeat(7, 1fr); }
+.grid3 { grid-template-columns: repeat(3, 1fr); }
+.grid7 .wd { text-align: center; font-size: 11px; color: var(--muted); padding-bottom: 2px; }
+.cell {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-height: 46px; padding: 4px 2px; border: 1px solid var(--line); border-radius: 9px;
+  background: var(--surface); color: var(--text); font-size: 14px;
+}
+.cell.mon { min-height: 62px; font-size: 15px; }
+.cell .n { line-height: 1.1; }
+.cell .cnt { font-size: 11px; color: var(--muted); line-height: 1.1; text-align: center; }
+.cell .cnt.wait { color: var(--wait); }
+.cell.out { opacity: .4; }
+.cell.today { border-color: var(--accent); border-width: 2px; }
+.cell.today .n { color: var(--accent); font-weight: 700; }

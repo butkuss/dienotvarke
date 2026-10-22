@@ -1,5 +1,5 @@
 // Network-first cache so the app opens offline but picks up updates right away.
-const CACHE = 'dienotvarke-v1';
+const CACHE = 'dienotvarke-v2';
 const ASSETS = ['./', 'index.html', 'style.css', 'app.js', 'sync.js', 'manifest.webmanifest', 'icon.svg'];
 
 self.addEventListener('install', e => {

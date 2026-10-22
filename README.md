@@ -5,8 +5,15 @@ be jokių mokamų paslaugų.
 
 ## Kas yra
 
-- **Diena**: užduotys pagal dienas, pažymėjimas „atlikta“, neatliktos iš praėjusių dienų
-  rodomos šiandien su mygtuku „Į šiandien“.
+- **Planas**: keturi vaizdai, perjungiami viršuje.
+  - *Diena*: dienos užduotys, neatliktos iš praėjusių dienų rodomos šiandien su mygtuku „Į šiandien“.
+  - *Savaitė*: savaitės planai ir visos septynios dienos.
+  - *Mėnuo*: mėnesio planai ir kalendorius, kuriame matosi kiekvienos dienos atlikta/iš viso.
+  - *Metai*: metų planai, 12 mėnesių apžvalga ir užduotys be datos.
+
+  Užduotis priklauso vienam laikotarpiui: dienai, savaitei, mėnesiui ar metams. Jis keičiamas
+  užduoties redagavimo lange. Nieko netrinama, todėl bet kada galima grįžti ir pažiūrėti,
+  kas buvo daroma konkrečią praėjusią dieną.
 - **⏳ Laukiu**: užduotis, kuri stringa dėl kito žmogaus atsakymo. Visos tokios surenkamos
   skiltyje „Laukiu“, seniausios viršuje.
 - **Automobiliai**: kiekvienam automobiliui atskiras puslapis su darbų sąrašu ir užrašais.
