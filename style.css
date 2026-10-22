@@ -260,3 +260,12 @@ h4.sub { font-size: 15px; margin: 16px 0 6px; }
 .cell.out { opacity: .4; }
 .cell.today { border-color: var(--accent); border-width: 2px; }
 .cell.today .n { color: var(--accent); font-weight: 700; }
+
+/* Sync warnings */
+.banner {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin: 12px 0; padding: 12px 14px; border-radius: var(--radius);
+  border: 1px solid var(--wait); background: var(--wait-soft); font-size: 14px;
+}
+.banner button { flex: none; }
+.banner.err-banner { border-color: var(--due); background: var(--due-soft); }

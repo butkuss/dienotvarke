@@ -206,7 +206,7 @@ function render() {
   $('#waitCount').textContent = tasks().filter(t => t.status === 'waiting').length || '';
 
   const views = { plan: viewPlan, waiting: viewWaiting, cars: state.carId ? viewCar : viewCars, settings: viewSettings };
-  $('#view').innerHTML = views[state.tab]();
+  $('#view').innerHTML = banner() + views[state.tab]();
   renderSyncDot();
 
   if (state.focus) {
@@ -214,6 +214,25 @@ function render() {
     if (el) el.focus();
     state.focus = null;
   }
+}
+
+// A device that is not syncing must look different at a glance, not just by a small dot.
+function banner() {
+  if (state.tab === 'settings') return '';
+  if (!Sync.config()) {
+    return `<div class="banner warn-banner">
+      <div><b>Sinchronizacija neįjungta šiame įrenginyje.</b> Užduotys saugomos tik čia, kituose įrenginiuose jų nesimato.</div>
+      <button class="small" data-action="go-settings">Įjungti</button>
+    </div>`;
+  }
+  const st = Sync.status();
+  if (st.state === 'error') {
+    return `<div class="banner err-banner">
+      <div><b>Sinchronizacija neveikia.</b> ${esc(st.error)}</div>
+      <button class="small" data-action="sync-now">Bandyti dar kartą</button>
+    </div>`;
+  }
+  return '';
 }
 
 function section(title, body, cls = '') {
@@ -573,6 +592,8 @@ function viewSettings() {
          <label>Token<input name="token" type="password" autocomplete="off" required></label>
          <button type="submit">Prijungti</button>
        </form>
+       <p class="hint"><b>Svarbu:</b> iPhone telefone programėlė, atidaryta iš pradinio ekrano, turi atskirą
+         atmintį nuo Safari. Token reikia įvesti būtent toje vietoje, kurioje rašai užduotis.</p>
        <details><summary>Kaip gauti token?</summary>
          <ol class="hint">
            <li>GitHub svetainėje: Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token.</li>
@@ -685,6 +706,7 @@ const actions = {
   'reminder-done': id => { touch(findNote(id), { remindDone: true }); commit(); },
   'open-note-car': id => { state.tab = 'cars'; state.carId = findNote(id).carId; state.editId = null; render(); scrollTo(0, 0); },
 
+  'go-settings': () => { state.tab = 'settings'; state.editId = null; render(); scrollTo(0, 0); },
   'sync-dot': () => {
     if (Sync.config()) Sync.run();
     else { state.tab = 'settings'; render(); }
@@ -853,7 +875,8 @@ Sync.init({
   },
   onStatus: () => {
     renderSyncDot();
-    if (state.tab === 'settings') { state.renderSoft = true; render(); }
+    state.renderSoft = true;
+    render();
   },
 });
 
