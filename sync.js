@@ -7,6 +7,7 @@ const Sync = (() => {
   const CFG_KEY = 'dienotvarke.sync.v1';
   const API = 'https://api.github.com/repos';
   const SCOPES = ['day', 'week', 'month', 'year'];
+  const STATUSES = ['todo', 'doing', 'waiting', 'done'];
 
   let cfg = loadCfg();
   let hooks = null;
@@ -38,7 +39,12 @@ const Sync = (() => {
   function normalize(d) {
     const arr = x => (Array.isArray(x) ? x.filter(i => i && typeof i.id === 'string') : []);
     // Tasks written before plans existed have no scope: they are day tasks.
-    const scoped = arr(d?.tasks).map(t => (SCOPES.includes(t.scope) ? t : { ...t, scope: 'day' }));
+    const scoped = arr(d?.tasks).map(t => {
+      const fix = {};
+      if (!SCOPES.includes(t.scope)) fix.scope = 'day';
+      if (!STATUSES.includes(t.status)) fix.status = 'todo';
+      return Object.keys(fix).length ? { ...t, ...fix } : t;
+    });
     return { version: 1, tasks: scoped, cars: arr(d?.cars), notes: arr(d?.notes) };
   }
 

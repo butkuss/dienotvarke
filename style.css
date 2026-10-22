@@ -7,6 +7,8 @@
   --line: #e2dfd8;
   --accent: #2f5d50;
   --accent-soft: #dcebe5;
+  --doing: #1f5fbf;
+  --doing-soft: #e2ecfb;
   --wait: #a35f00;
   --wait-soft: #fbecd6;
   --due: #b3261e;
@@ -26,6 +28,8 @@
     --line: #33373e;
     --accent: #7fbfa9;
     --accent-soft: #23362f;
+    --doing: #7fb3f2;
+    --doing-soft: #1f2d3e;
     --wait: #f0b45c;
     --wait-soft: #3a2d18;
     --due: #f2938c;
@@ -269,3 +273,11 @@ h4.sub { font-size: 15px; margin: 16px 0 6px; }
 }
 .banner button { flex: none; }
 .banner.err-banner { border-color: var(--due); background: var(--due-soft); }
+
+/* Daroma */
+.task.doing { border-color: var(--doing); background: var(--doing-soft); }
+.task.doing .check { border-color: var(--doing); }
+.go { color: var(--muted); font-size: 15px; }
+.go.on { color: var(--doing); border-color: var(--doing); background: var(--doing-soft); }
+.cell .cnt.go, .dayhead .dc .go { color: var(--doing); font-weight: 600; }
+.task .icon { width: 42px; height: 42px; }

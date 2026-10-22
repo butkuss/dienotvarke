@@ -14,6 +14,10 @@ be jokių mokamų paslaugų.
   Užduotis priklauso vienam laikotarpiui: dienai, savaitei, mėnesiui ar metams. Jis keičiamas
   užduoties redagavimo lange. Nieko netrinama, todėl bet kada galima grįžti ir pažiūrėti,
   kas buvo daroma konkrečią praėjusią dieną.
+- **Būsenos**: kiekviena užduotis yra vienos iš keturių būsenų, keičiamų vienu paspaudimu:
+  *Reikia padaryti* (numatytoji), *Daroma* (mygtukas ▶, mėlyna), *Laukiu atsakymo*
+  (mygtukas ⏳, geltona) ir *Atlikta* (apskritimas su varnele). Pradėtos užduotys visada
+  sąrašo viršuje, o pradėtos kitomis dienomis rodomos ir šiandienos vaizde.
 - **⏳ Laukiu**: užduotis, kuri stringa dėl kito žmogaus atsakymo. Visos tokios surenkamos
   skiltyje „Laukiu“, seniausios viršuje.
 - **Automobiliai**: kiekvienam automobiliui atskiras puslapis su darbų sąrašu ir užrašais.

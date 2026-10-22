@@ -6,7 +6,8 @@ const WEEKDAYS = ['sekmadienis', 'pirmadienis', 'antradienis', 'trečiadienis', 
 const WD_SHORT = ['Pr', 'An', 'Tr', 'Kt', 'Pn', 'Št', 'Sk'];
 const MONTHS = ['sausio', 'vasario', 'kovo', 'balandžio', 'gegužės', 'birželio', 'liepos', 'rugpjūčio', 'rugsėjo', 'spalio', 'lapkričio', 'gruodžio'];
 const MONTHS_NOM = ['Sausis', 'Vasaris', 'Kovas', 'Balandis', 'Gegužė', 'Birželis', 'Liepa', 'Rugpjūtis', 'Rugsėjis', 'Spalis', 'Lapkritis', 'Gruodis'];
-const STATUS_ORDER = { todo: 0, waiting: 1, done: 2 };
+const STATUS_ORDER = { doing: 0, todo: 1, waiting: 2, done: 3 };
+const STATUSES = ['todo', 'doing', 'waiting', 'done'];
 const SCOPES = ['day', 'week', 'month', 'year'];
 const SCOPE_NAME = { day: 'Diena', week: 'Savaitė', month: 'Mėnuo', year: 'Metai' };
 const SCOPE_PLANS = { week: 'Savaitės planai', month: 'Mėnesio planai', year: 'Metų planai' };
@@ -187,7 +188,12 @@ function sortTasks(list) {
   return list.sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || a.createdAt - b.createdAt);
 }
 
-const counts = list => ({ total: list.length, done: list.filter(t => t.status === 'done').length, waiting: list.filter(t => t.status === 'waiting').length });
+const counts = list => ({
+  total: list.length,
+  done: list.filter(t => t.status === 'done').length,
+  doing: list.filter(t => t.status === 'doing').length,
+  waiting: list.filter(t => t.status === 'waiting').length,
+});
 
 // ---------- views ----------
 
@@ -256,9 +262,12 @@ function addTaskForm(ctx, placeholder) {
 }
 
 function progress(list, label = 'Atlikta') {
-  const { done, total } = counts(list);
+  const { done, total, doing } = counts(list);
   if (!total) return '';
-  return `<div class="progress"><span>${label} ${done} iš ${total}</span><div class="bar"><span style="width:${Math.round(done / total * 100)}%"></span></div></div>`;
+  return `<div class="progress">
+    <span>${label} ${done} iš ${total}${doing ? ` · daroma ${doing}` : ''}</span>
+    <div class="bar"><span style="width:${Math.round(done / total * 100)}%"></span></div>
+  </div>`;
 }
 
 function taskRow(t, o = {}) {
@@ -273,7 +282,7 @@ function taskRow(t, o = {}) {
   const waiting = t.status === 'waiting'
     ? `<div class="waiting-line">Laukiu${t.waitingFor ? ': ' + esc(t.waitingFor) : ' atsakymo'} · ${waitAge(t.waitingSince || t.updatedAt)}</div>` : '';
   const actions = [];
-  if (o.moveToday) actions.push(`<button class="small" data-action="move-today">Į šiandien</button>`);
+  if (o.moveToday && t.scope === 'day') actions.push(`<button class="small" data-action="move-today">Į šiandien</button>`);
   if (o.carryTo) actions.push(`<button class="small" data-action="carry">Perkelti ${SCOPE_HERE[o.carryTo]}</button>`);
   if (o.waitingActions) actions.push(`<button class="small" data-action="answered">Atsakė, tęsiu šiandien</button>`);
 
@@ -286,7 +295,8 @@ function taskRow(t, o = {}) {
       ${t.note ? `<div class="tnote">${esc(t.note)}</div>` : ''}
       ${actions.length ? `<div class="actions">${actions.join('')}</div>` : ''}
     </div>
-    ${t.status !== 'done' ? `<button class="icon wait ${t.status === 'waiting' ? 'on' : ''}" data-action="toggle-wait" aria-label="Laukiu atsakymo" title="Laukiu atsakymo">⏳</button>` : ''}
+    ${t.status !== 'done' ? `<button class="icon go ${t.status === 'doing' ? 'on' : ''}" data-action="toggle-doing" aria-label="Daroma" title="Daroma">▶</button>
+    <button class="icon wait ${t.status === 'waiting' ? 'on' : ''}" data-action="toggle-wait" aria-label="Laukiu atsakymo" title="Laukiu atsakymo">⏳</button>` : ''}
   </li>`;
   return row + (state.editId === t.id ? taskEditor(t) : '');
 }
@@ -301,7 +311,7 @@ function taskEditor(t) {
     </div>
     <p class="hint">Savaitės, mėnesio ar metų planui pakanka pasirinkti bet kurią to laikotarpio dieną.</p>
     <label>Automobilis<select name="car">${carOptions(t.carId)}</select></label>
-    <label>Būsena<select name="status">${opt('todo', 'Reikia padaryti', t.status)}${opt('waiting', 'Laukiu atsakymo', t.status)}${opt('done', 'Atlikta', t.status)}</select></label>
+    <label>Būsena<select name="status">${opt('todo', 'Reikia padaryti', t.status)}${opt('doing', 'Daroma', t.status)}${opt('waiting', 'Laukiu atsakymo', t.status)}${opt('done', 'Atlikta', t.status)}</select></label>
     <label>Ko laukiu<input name="waitingFor" value="${esc(t.waitingFor)}" placeholder="pvz. meistro atsakymo dėl kainos"></label>
     <label>Pastaba<textarea name="note" rows="2">${esc(t.note)}</textarea></label>
     <div class="row buttons">
@@ -360,6 +370,9 @@ function planDay() {
   const t = todayISO();
   const dayTasks = daysIn(d, d);
   const overdue = d === t ? sortTasks(tasks().filter(x => x.scope === 'day' && x.date && x.date < t && x.status !== 'done')) : [];
+  // Started but filed under another day, and not already listed above.
+  const doingElse = sortTasks(tasks().filter(x =>
+    x.status === 'doing' && x.date !== d && !overdue.some(o => o.id === x.id)));
   const reminders = notes()
     .filter(n => n.remindOn && !n.remindDone && (n.remindOn === d || (d === t && n.remindOn < t)))
     .sort((a, b) => a.remindOn.localeCompare(b.remindOn));
@@ -374,7 +387,9 @@ function planDay() {
     ${progress(dayTasks)}
     ${dayTasks.length
       ? `<ul class="list">${dayTasks.map(x => taskRow(x)).join('')}</ul>`
-      : `<p class="empty">Šiai dienai užduočių nėra.</p>`}`;
+      : `<p class="empty">Šiai dienai užduočių nėra.</p>`}
+    ${doingElse.length ? section(`Pradėta kitomis dienomis (${doingElse.length})`,
+      `<ul class="list">${doingElse.map(x => taskRow(x, { showDate: true, moveToday: true })).join('')}</ul>`) : ''}`;
 }
 
 function plansSection(scope) {
@@ -390,9 +405,9 @@ function plansSection(scope) {
 
 function dayGroup(iso) {
   const list = daysIn(iso, iso);
-  const { done, total, waiting } = counts(list);
+  const { done, total, doing, waiting } = counts(list);
   const wd = WEEKDAYS[parseISO(iso).getDay()];
-  const note = total ? `${done}/${total}${waiting ? ' · ⏳' + waiting : ''}` : '—';
+  const note = total ? `${done}/${total}${doing ? ' · ▶' + doing : ''}${waiting ? ' · ⏳' + waiting : ''}` : '—';
   return `<div class="daygroup">
     <button class="dayhead ${iso === todayISO() ? 'today' : ''}" data-action="open-day" data-date="${iso}">
       <span class="dn">${wd.charAt(0).toUpperCase() + wd.slice(1)}, ${parseISO(iso).getDate()} d.</span>
@@ -418,11 +433,11 @@ function planMonth() {
   const gridEnd = addDays(weekStart(last), 6);
   const cells = [];
   for (let iso = weekStart(first); iso <= gridEnd; iso = addDays(iso, 1)) {
-    const { done, total, waiting } = counts(daysIn(iso, iso));
+    const { done, total, doing, waiting } = counts(daysIn(iso, iso));
     const out = iso < first || iso > last;
     cells.push(`<button class="cell ${out ? 'out' : ''} ${iso === t ? 'today' : ''}" data-action="open-day" data-date="${iso}">
       <span class="n">${parseISO(iso).getDate()}</span>
-      <span class="cnt ${waiting ? 'wait' : ''}">${total ? (done === total ? '✓' : `${done}/${total}`) : ''}</span>
+      <span class="cnt ${doing ? 'go' : waiting ? 'wait' : ''}">${total ? (done === total ? '✓' : `${done}/${total}`) : ''}</span>
     </button>`);
   }
   const weeks = [];
@@ -445,11 +460,11 @@ function planYear() {
   const t = todayISO();
   const cells = MONTHS_NOM.map((name, i) => {
     const iso = isoDate(new Date(y, i, 1));
-    const { done, total } = counts(daysIn(iso, monthEnd(iso)));
+    const { done, total, doing } = counts(daysIn(iso, monthEnd(iso)));
     const plans = plansOf('month', iso).length;
     return `<button class="cell mon ${monthStart(t) === iso ? 'today' : ''}" data-action="open-month" data-date="${iso}">
       <span class="n">${name}</span>
-      <span class="cnt">${total ? `${done}/${total}` : ''}${plans ? ` · ${plans} pl.` : ''}</span>
+      <span class="cnt ${doing ? 'go' : ''}">${total ? `${done}/${total}` : ''}${plans ? ` · ${plans} pl.` : ''}</span>
     </button>`;
   });
   const months = MONTHS_NOM.map((name, i) => {
@@ -652,6 +667,7 @@ const actions = {
   'open-month': (id, el) => { state.date = el.dataset.date; setView('month'); },
 
   'toggle-done': id => { const t = findTask(id); setStatus(t, t.status === 'done' ? 'todo' : 'done'); commit(); },
+  'toggle-doing': id => { const t = findTask(id); setStatus(t, t.status === 'doing' ? 'todo' : 'doing'); commit(); },
   'toggle-wait': id => {
     const t = findTask(id);
     if (t.status === 'waiting') {
@@ -678,7 +694,7 @@ const actions = {
     commit();
   },
   'carry': id => { const t = findTask(id); touch(t, { date: anchorFor(t.scope, todayISO()) }); commit(); toast('Perkelta'); },
-  'answered': id => { const t = findTask(id); setStatus(t, 'todo'); touch(t, { date: todayISO(), scope: 'day' }); commit(); toast('Perkelta į šiandien'); },
+  'answered': id => { const t = findTask(id); setStatus(t, 'doing'); touch(t, { date: todayISO(), scope: 'day' }); commit(); toast('Perkelta į šiandien'); },
 
   'open-car': id => { state.carId = id; state.editId = null; render(); scrollTo(0, 0); },
   'close-car': () => { state.carId = null; state.editId = null; render(); },
