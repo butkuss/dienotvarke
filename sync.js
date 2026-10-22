@@ -6,8 +6,6 @@
 const Sync = (() => {
   const CFG_KEY = 'dienotvarke.sync.v1';
   const API = 'https://api.github.com/repos';
-  const SCOPES = ['day', 'week', 'month', 'year'];
-  const STATUSES = ['todo', 'doing', 'waiting', 'done'];
 
   let cfg = loadCfg();
   let hooks = null;
@@ -35,37 +33,9 @@ const Sync = (() => {
   }
 
   // ---- data shape ----
-
-  function normalize(d) {
-    const arr = x => (Array.isArray(x) ? x.filter(i => i && typeof i.id === 'string') : []);
-    // Tasks written before plans existed have no scope: they are day tasks.
-    const scoped = arr(d?.tasks).map(t => {
-      const fix = {};
-      if (!SCOPES.includes(t.scope)) fix.scope = 'day';
-      if (!STATUSES.includes(t.status)) fix.status = 'todo';
-      return Object.keys(fix).length ? { ...t, ...fix } : t;
-    });
-    return { version: 1, tasks: scoped, cars: arr(d?.cars), notes: arr(d?.notes) };
-  }
-
-  function mergeList(a, b) {
-    const byId = new Map(a.map(x => [x.id, x]));
-    for (const y of b) {
-      const x = byId.get(y.id);
-      if (!x || (y.updatedAt || 0) > (x.updatedAt || 0)) byId.set(y.id, y);
-    }
-    return [...byId.values()].sort((p, q) => (p.id < q.id ? -1 : p.id > q.id ? 1 : 0));
-  }
-
-  function merge(a, b) {
-    return {
-      version: 1,
-      tasks: mergeList(a.tasks, b.tasks),
-      cars: mergeList(a.cars, b.cars),
-      notes: mergeList(a.notes, b.notes),
-    };
-  }
-
+  // Shapes, migration and record merging live in model.js so every client agrees.
+  const normalize = d => Model.normalize(d);
+  const merge = (a, b) => Model.merge(a, b);
   const canonical = d => JSON.stringify(merge(d, normalize({})));
 
   // ---- GitHub API ----
