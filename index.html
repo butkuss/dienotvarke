@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="lt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f5f2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#16181c" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Dienotvarkė">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <title>Dienotvarkė</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Dienotvarkė</h1>
+    <button id="syncDot" class="sync-dot" data-action="sync-dot" aria-label="Sinchronizacija"></button>
+  </header>
+  <main id="view"></main>
+  <nav class="tabs">
+    <button data-tab="day">Diena</button>
+    <button data-tab="waiting">Laukiu<span id="waitCount" class="badge"></span></button>
+    <button data-tab="cars">Automobiliai</button>
+    <button data-tab="settings">Nustatymai</button>
+  </nav>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="sync.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
