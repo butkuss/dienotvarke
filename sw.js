@@ -1,5 +1,5 @@
 // Network-first cache so the app opens offline but picks up updates right away.
-const CACHE = 'diena-v5';
+const CACHE = 'diena-v6';
 const ASSETS = ['./', 'index.html', 'style.css', 'app.js', 'sync.js', 'model.js', 'views.js', 'manifest.webmanifest', 'icon.svg'];
 
 self.addEventListener('install', e => {

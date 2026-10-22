@@ -36,7 +36,8 @@ const Sync = (() => {
   // Shapes, migration and record merging live in model.js so every client agrees.
   const normalize = d => Model.normalize(d);
   const merge = (a, b) => Model.merge(a, b);
-  const canonical = d => JSON.stringify(merge(d, normalize({})));
+  // Key-order independent, so two devices never disagree about "nothing changed".
+  const canonical = d => Model.canonJSON(merge(d, normalize({})));
 
   // ---- GitHub API ----
 
